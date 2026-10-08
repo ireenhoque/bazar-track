@@ -1,8 +1,12 @@
+import Marquee from "@/components/Marquee";
 
-export default function Home() {
+
+const page = () => {
   return (
     <div>
-      
+      <Marquee/>
     </div>
   );
-}
+};
+
+export default page;
