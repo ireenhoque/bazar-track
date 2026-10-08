@@ -35,7 +35,7 @@ const Header = () => {
                     </button>
 
                     <button
-                        className="whitespace-nowrap rounded-lg bg-green-700 px-3 py-1.5 text-[11px] font-semibold text-white shadow-md transition hover:bg-green-800 sm:px-4 sm:py-2 sm:text-[13px]"
+                        className="whitespace-nowrap rounded-lg bg-green-700 px-3 py-1.5 text-[11px] font-semibold text-white shadow-md transition duration-200 hover:bg-green-800 hover:shadow-[0_3px_6px_rgba(21,128,61,0.65)] sm:px-4 sm:py-2 sm:text-[13px]"
                     >
                         সাইন আপ
                     </button>
