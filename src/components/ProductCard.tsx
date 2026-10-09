@@ -1,81 +1,117 @@
-// import Link from "next/link";
+"use client";
 
-// type Product = {
-//     id: number | string;
-//     nameBn: string;
-//     icon: string;
-//     unit: string;
-//     price: number;
-//     changePercent: number;
-// };
+import Link from "next/link";
+import { useState } from "react";
 
-// const toBanglaNumber = (value: number | string) => {
-//     return value
-//         .toString()
-//         .replace(/\d/g, (digit) => "০১২৩৪৫৬৭৮৯"[Number(digit)]);
-// };
+export type Product = {
+  id: number;
+  slug: string;
+  nameBn: string;
+  category: string;
+  categoryNameBn: string;
+  categoryIcon: string;
+  image: string;
+  unit: string;
+  today: number;
+  yesterday: number;
+  lastWeek: number;
+  lastMonth: number;
+  change?: {
+    dir: "up" | "down" | "same";
+    pct: number;
+  };
+};
 
-// const ProductCard = ({ product }: { product: Product }) => {
-//     const change = Number(product.changePercent);
+type ProductCardProps = {
+  product: Product;
+};
 
-//     const isUp = change > 0;
-//     const isDown = change < 0;
+const bnNumber = new Intl.NumberFormat("bn-BD", {
+  maximumFractionDigits: 2,
+});
 
-//     return (
-//         <Link
-//             href={`/product/${product.id}`}
-//             className="group block rounded-xl border border-gray-200 bg-white p-3 transition duration-200 hover:-translate-y-0.5 hover:border-green-200 hover:shadow-[0_3px_8px_rgba(21,128,61,0.12)] sm:p-4"
-//         >
-//             {/* Product */}
-//             <div className="flex items-start gap-3">
-//                 {/* Icon */}
-//                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-xl">
-//                     {product.icon}
-//                 </div>
+function ProductVisual({ product }: { product: Product }) {
+  const [imageFailed, setImageFailed] = useState(false);
 
-//                 {/* Name */}
-//                 <div className="min-w-0">
-//                     <h3 className="truncate text-sm font-semibold text-gray-900 sm:text-[15px]">
-//                         {product.nameBn}
-//                     </h3>
+  const imageValue = product.image?.trim() ?? "";
+  const categoryIcon = product.categoryIcon?.trim() || "🛒";
 
-//                     <p className="mt-0.5 text-[10px] text-gray-500 sm:text-xs">
-//                         {product.unit}
-//                     </p>
-//                 </div>
-//             </div>
+  const isImageUrl =
+    imageValue.startsWith("https://") ||
+    imageValue.startsWith("http://") ||
+    imageValue.startsWith("/");
 
-//             {/* Price */}
-//             <div className="mt-4 flex items-end justify-between gap-2">
-//                 <div>
-//                     <p className="text-[9px] text-gray-500 sm:text-[10px]">
-//                         আজকের দাম
-//                     </p>
+  if (isImageUrl && !imageFailed) {
+    return (
+      <img
+        src={imageValue}
+        alt={product.nameBn}
+        className="h-full w-full object-contain p-1"
+        loading="lazy"
+        onError={() => setImageFailed(true)}
+      />
+    );
+  }
 
-//                     <p className="mt-0.5 text-sm font-bold text-gray-900 sm:text-base">
-//                         {toBanglaNumber(product.price)} টাকা
-//                     </p>
-//                 </div>
+  if (imageValue && !isImageUrl) {
+    return <span>{imageValue}</span>;
+  }
 
-//                 {/* Change */}
-//                 <span
-//                     className={`rounded-full px-2 py-1 text-[9px] font-semibold sm:text-[10px] ${
-//                         isUp
-//                             ? "bg-red-50 text-red-600"
-//                             : isDown
-//                               ? "bg-green-50 text-green-700"
-//                               : "bg-gray-100 text-gray-500"
-//                     }`}
-//                 >
-//                     {isUp && "▲ "}
-//                     {isDown && "▼ "}
-//                     {!isUp && !isDown && "—"}
+  return <span>{categoryIcon}</span>;
+}
 
-//                     {toBanglaNumber(Math.abs(change).toFixed(1))}%
-//                 </span>
-//             </div>
-//         </Link>
-//     );
-// };
+export default function ProductCard({ product }: ProductCardProps) {
+  const direction = product.change?.dir ?? "same";
+  const percentage = Math.abs(product.change?.pct ?? 0);
 
-// export default ProductCard;
+  const badgeStyle =
+    direction === "up"
+      ? "bg-red-50 text-red-600"
+      : direction === "down"
+        ? "bg-green-50 text-green-600"
+        : "bg-gray-100 text-gray-500";
+
+  const arrow =
+    direction === "up" ? "▲" : direction === "down" ? "▼" : "—";
+
+  return (
+    <Link
+      href={`/product/${product.slug}`}
+      className="flex min-w-0 flex-col rounded-xl border border-[#e1e9e1] bg-white p-2.5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-3 md:p-4"
+    >
+      <div className="flex min-w-0 items-center gap-2">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#f0f5f0] text-lg sm:h-9 sm:w-9 sm:text-xl">
+          <ProductVisual product={product} />
+        </span>
+
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-xs font-semibold leading-4 text-[#253129] sm:text-sm">
+            {product.nameBn}
+          </h3>
+
+          <p className="mt-0.5 truncate text-[10px] leading-3 text-gray-500 sm:text-xs">
+            প্রতি {product.unit}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-2.5 sm:mt-3">
+        <p className="text-[10px] leading-3 text-gray-500 sm:text-xs">
+          আজকের দাম
+        </p>
+
+        <div className="mt-1 flex min-w-0 flex-wrap items-center justify-between gap-1">
+          <p className="min-w-0 text-sm font-bold leading-5 text-[#253129] sm:text-base">
+            {bnNumber.format(product.today)} টাকা
+          </p>
+
+          <span
+            className={`inline-flex shrink-0 items-center gap-0.5 rounded-full px-1.5 py-1 text-[9px] font-semibold leading-none sm:text-[10px] ${badgeStyle}`}
+          >
+            {arrow} {bnNumber.format(percentage)}%
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}

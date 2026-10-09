@@ -1,34 +1,41 @@
 import type { Metadata } from "next";
-import { Noto_Serif_Bengali } from "next/font/google";
+import { Noto_Sans_Bengali } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Banner from "@/components/Banner";
-import Footer from "@/components/Footer";
 
-const notoSerifBengali = Noto_Serif_Bengali({
-  subsets: ["latin", 'bengali'],
+import Header from "@/components/Header";
+import Marquee from "@/components/Marquee";
+import Footer from "@/components/Footer";
+import ToastProvider from "@/components/providers/ToastProvider";
+
+const bengaliFont = Noto_Sans_Bengali({
+  subsets: ["bengali", "latin"],
+  variable: "--font-bengali",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "বাজার দর",
-  description: "আজকের বাজারের পণ্যের দাম এক নজরে",
+  description: "প্রয়োজনীয় পণ্যের দাম এক নজরে।",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html
-      lang="bn"
-      className={`${notoSerifBengali.className} h-full antialiased`}
-    >
-      <body className="min-h-full bg-[#f4f8f4]">
+    <html lang="bn" data-scroll-behavior="smooth">
+      <body
+        className={`${bengaliFont.className} flex min-h-screen flex-col bg-[#f0f5f0]`}
+      >
+        <ToastProvider />
+
         <Header />
+        <Marquee />
 
-        <main className="flex-1">
-          {children}
-          <Banner />
-        </main>
+        <main className="flex-1">{children}</main>
 
-        <Footer/>
+        <Footer />
       </body>
     </html>
   );
