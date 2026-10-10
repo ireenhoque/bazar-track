@@ -1,3 +1,4 @@
+
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
@@ -18,17 +19,46 @@ type ProductDetails = Product & {
 };
 
 async function getProduct(slug: string): Promise<ProductDetails | null> {
-  const response = await fetch(
+  const apiUrls = [
+    "https://api.api-store.workers.dev/api/bazardor/products",
     "https://api.abcz.workers.dev/api/bazardor/products",
-    { next: { revalidate: 300 } }
-  );
+  ];
 
-  if (!response.ok) {
-    throw new Error("পণ্যের তথ্য লোড করা যায়নি।");
+  for (const url of apiUrls) {
+    try {
+      const response = await fetch(url, {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        console.error(
+          `Product API failed: ${url} (${response.status})`
+        );
+        continue;
+      }
+
+      const data: unknown = await response.json();
+
+      if (!Array.isArray(data)) {
+        console.error(`Unexpected product data from: ${url}`);
+        continue;
+      }
+
+      const products = data as ProductDetails[];
+
+      const product = products.find(
+        (item) => item.slug === slug
+      );
+
+      if (product) {
+        return product;
+      }
+    } catch (error) {
+      console.error(`Could not connect to product API: ${url}`, error);
+    }
   }
 
-  const products: ProductDetails[] = await response.json();
-  return products.find((product) => product.slug === slug) ?? null;
+  throw new Error("পণ্যের তথ্য লোড করা যায়নি।");
 }
 
 export default async function ProductPage({
@@ -62,7 +92,8 @@ export default async function ProductPage({
     product.markets && product.markets.length > 0
       ? Math.round(
           product.markets.reduce(
-            (sum, market) => sum + (market.min + market.max) / 2,
+            (sum, market) =>
+              sum + (market.min + market.max) / 2,
             0
           ) / product.markets.length
         )
@@ -164,9 +195,15 @@ export default async function ProductPage({
               <table className="w-full text-left text-sm">
                 <thead className="bg-gray-50 text-gray-600">
                   <tr>
-                    <th className="px-4 py-3 font-semibold">বাজার</th>
-                    <th className="px-4 py-3 font-semibold">সর্বনিম্ন</th>
-                    <th className="px-4 py-3 font-semibold">সর্বোচ্চ</th>
+                    <th className="px-4 py-3 font-semibold">
+                      বাজার
+                    </th>
+                    <th className="px-4 py-3 font-semibold">
+                      সর্বনিম্ন
+                    </th>
+                    <th className="px-4 py-3 font-semibold">
+                      সর্বোচ্চ
+                    </th>
                   </tr>
                 </thead>
 

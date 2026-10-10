@@ -29,13 +29,17 @@ export default function Banner() {
             দেখে নিন পণ্যের দাম, আর কেনাকাটা করুন আরও সচেতনভাবে।
           </p>
 
+
+
           <Link
-            href="/"
+            href="#সব-পণ্য"
             className="mt-6 inline-flex items-center gap-2 rounded-lg bg-green-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
           >
             সব পণ্য দেখুন
             <span aria-hidden="true">→</span>
           </Link>
+
+
         </div>
 
         <div className="order-1 flex min-h-[180px] items-center justify-center md:order-2 md:min-h-[280px]">

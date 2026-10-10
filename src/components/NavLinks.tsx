@@ -31,19 +31,13 @@ async function getCategories(): Promise<Category[]> {
 export default async function NavLinks() {
   const categories = await getCategories();
 
+
   return (
     <nav
       aria-label="পণ্যের ক্যাটাগরি"
       className="w-full overflow-x-auto border-t border-gray-100"
     >
       <div className="mx-auto flex w-full max-w-7xl items-center gap-5 px-3 py-3 sm:gap-7 sm:px-6 lg:px-8">
-        <Link
-          href="/"
-          className="shrink-0 text-xs font-semibold text-gray-700 transition hover:text-green-700 sm:text-sm"
-        >
-          সব পণ্য
-        </Link>
-
         {categories.map((category) => (
           <Link
             key={category.id}
@@ -57,4 +51,5 @@ export default async function NavLinks() {
       </div>
     </nav>
   );
+
 }

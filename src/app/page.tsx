@@ -63,7 +63,7 @@ export default async function HomePage() {
         />
 
         <ProductSection
-          id="sob-panno"
+          id="সব-পণ্য"
           title="সব পণ্য"
           description="আজকের সব নিত্যপ্রয়োজনীয় পণ্যের বাজারদর"
           products={products}
