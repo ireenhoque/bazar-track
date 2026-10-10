@@ -5,6 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -23,21 +24,24 @@ export default function SignInPage() {
     try {
       const params = new URLSearchParams(window.location.search);
       const requestedPath = params.get("callbackURL") || "/";
+
       const callbackURL =
         requestedPath.startsWith("/") &&
-          !requestedPath.startsWith("//")
+          !requestedPath.startsWith("//") &&
+          !requestedPath.includes("\\")
           ? requestedPath
           : "/";
 
       const { error } = await authClient.signIn.email({
-        email,
+        email: email.trim(),
         password,
         callbackURL,
       });
 
       if (error) {
         setErrorMessage(
-          error.message || "ইমেইল অথবা পাসওয়ার্ড সঠিক নয়। আবার চেষ্টা করুন।"
+          error.message ||
+          "ইমেইল অথবা পাসওয়ার্ড সঠিক নয়। আবার চেষ্টা করুন।"
         );
         return;
       }
@@ -54,116 +58,111 @@ export default function SignInPage() {
   }
 
   return (
-    <main className="flex min-h-[70vh] items-center justify-center bg-green-50/70 px-4 py-10 sm:py-14">
-      <section className="w-full max-w-md rounded-2xl border border-green-100 bg-white p-6 shadow-sm sm:p-9">
-        <div className="mb-7 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-green-100 text-3xl">
-            🛒
-          </div>
-
-          <h1 className="mt-4 text-2xl font-bold text-gray-900">
-            আবার স্বাগতম!
+    <main className="flex min-h-[65vh] w-full items-center justify-center bg-[#f0f5f0] px-4 py-10 sm:py-12">
+      <div className="w-full max-w-md">
+        <header className="mb-5 text-center">
+          <h1 className="text-xl font-bold text-[#253129] sm:text-2xl">
+            সাইন ইন
           </h1>
 
-          <p className="mt-2 text-sm leading-6 text-gray-500">
-            বাজার দর দেখতে আপনার অ্যাকাউন্টে সাইন ইন করুন।
+          <p className="mt-2 text-xs leading-5 text-gray-500">
+            নিরাপদে লগ ইন করুন এবং বাজারের দর দেখুন।
           </p>
-        </div>
+        </header>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label
-              htmlFor="email"
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
-              ইমেইল ঠিকানা
-            </label>
-
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              placeholder="আপনার ইমেইল লিখুন"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-green-600 focus:ring-2 focus:ring-green-100"
-            />
-          </div>
-
-          <div>
-            <div className="mb-2 flex items-center justify-between gap-3">
+        <section className="rounded-xl border border-[#e1e9e1] bg-white p-5 shadow-sm sm:p-6">
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div>
               <label
-                htmlFor="password"
-                className="text-sm font-medium text-gray-700"
+                htmlFor="signin-email"
+                className="mb-1 block text-xs font-medium text-[#253129]"
               >
-                পাসওয়ার্ড
+                ইমেইল
               </label>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setShowPassword((current) => !current)
-                }
-                className="text-xs font-medium text-green-700 hover:text-green-800"
-              >
-                {showPassword ? "লুকান" : "দেখুন"}
-              </button>
+              <input
+                id="signin-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+                className="w-full rounded-md border border-[#e1e9e1] bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-green-600 focus:ring-2 focus:ring-green-100"
+              />
             </div>
 
-            <input
-              id="password"
-              name="password"
-              type={showPassword ? "text" : "password"}
-              autoComplete="current-password"
-              placeholder="আপনার পাসওয়ার্ড লিখুন"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-green-600 focus:ring-2 focus:ring-green-100"
-            />
-          </div>
+            <div>
+              <div className="mb-1 flex items-center justify-between gap-3">
+                <label
+                  htmlFor="signin-password"
+                  className="text-xs font-medium text-[#253129]"
+                >
+                  পাসওয়ার্ড
+                </label>
 
-          {errorMessage && (
-            <p
-              role="alert"
-              className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-600"
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowPassword((current) => !current)
+                  }
+                  className="text-xs font-medium text-green-700 hover:text-green-800"
+                >
+                  {showPassword ? "লুকান" : "দেখুন"}
+                </button>
+              </div>
+
+              <input
+                id="signin-password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                placeholder="আপনার পাসওয়ার্ড লিখুন"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+                className="w-full rounded-md border border-[#e1e9e1] bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-green-600 focus:ring-2 focus:ring-green-100"
+              />
+            </div>
+
+            {errorMessage && (
+              <p
+                role="alert"
+                className="rounded-md border border-red-100 bg-red-50 px-3 py-2 text-xs leading-5 text-red-600"
+              >
+                {errorMessage}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full rounded-md bg-green-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {errorMessage}
-            </p>
-          )}
+              {isLoading ? "সাইন ইন হচ্ছে..." : "সাইন ইন"}
+            </button>
+          </form>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full rounded-lg bg-green-700 px-4 py-3 font-semibold text-white transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isLoading ? "সাইন ইন হচ্ছে..." : "সাইন ইন করুন"}
-          </button>
-        </form>
+          <div className="mt-4">
+            <SocialLoginButtons />
+          </div>
+        </section>
 
-        <div className="my-6 flex items-center gap-3">
-          <div className="h-px flex-1 bg-gray-100" />
-          <span className="text-xs text-gray-400">নতুন এখানে?</span>
-          <div className="h-px flex-1 bg-gray-100" />
-        </div>
-
-        <p className="text-center text-sm text-gray-600">
-          আপনার অ্যাকাউন্ট নেই?{" "}
+        <p className="mt-4 text-center text-xs text-gray-500">
+          অ্যাকাউন্ট নেই?{" "}
           <Link
             href="/sign-up"
             className="font-semibold text-green-700 hover:text-green-800"
           >
-            সাইন আপ করুন
+            নতুন অ্যাকাউন্ট তৈরি করুন
           </Link>
         </p>
 
-        <p className="mt-6 text-center text-xs leading-5 text-gray-400">
-          আপনার অ্যাকাউন্টে সাইন ইন করে বাজারের পণ্যের দাম ও
-          তুলনা দেখতে পারবেন।
+        <p className="mt-3 text-center text-xs leading-5 text-gray-400">
+          সাইন ইন করে বাজারের পণ্যের দাম ও তুলনা দেখুন।
         </p>
-      </section>
+      </div>
     </main>
   );
 }
