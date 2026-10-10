@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import type { Product } from "@/components/ProductCard";
+import { getApiUrl } from "@/lib/api";
 
 export const instant = false;
 
@@ -22,13 +23,12 @@ async function getProduct(
   slug: string
 ): Promise<ProductDetails | null> {
   const apiUrls = [
-    "https://api.api-store.workers.dev/api/bazardor/products",
-    "https://api.abcz.workers.dev/api/bazardor/products",
+    getApiUrl("products"),
   ];
 
   for (const url of apiUrls) {
     try {
-      const response = await fetch(url, {
+      const response = await fetch(getApiUrl("products"), {
         cache: "no-store",
       });
 
@@ -184,10 +184,10 @@ export default async function ProductPage({
 
             <p
               className={`mt-1 text-[10px] font-semibold ${isUp
-                  ? "text-red-600"
-                  : isDown
-                    ? "text-green-700"
-                    : "text-gray-500"
+                ? "text-red-600"
+                : isDown
+                  ? "text-green-700"
+                  : "text-gray-500"
                 }`}
             >
               {isUp ? "▲" : isDown ? "▼" : "—"}{" "}
@@ -296,8 +296,8 @@ export default async function ProductPage({
                       <tr
                         key={`${market.market}-${index}`}
                         className={`border-t border-[#e4ebe4] ${index % 2 === 1
-                            ? "bg-[#f0f5f0]"
-                            : "bg-white/70"
+                          ? "bg-[#f0f5f0]"
+                          : "bg-white/70"
                           }`}
                       >
                         <td className="px-3 py-3 font-medium text-[#253129]">

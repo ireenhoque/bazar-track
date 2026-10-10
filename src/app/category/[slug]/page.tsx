@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import CategoryProductList from "@/components/CategoryProductList";
 import type { Product } from "@/components/ProductCard";
+import { cacheLife } from "next/cache";
+import { getApiUrl } from "@/lib/api";
 
 export const instant = false;
 
@@ -12,11 +14,12 @@ type Category = {
   icon: string;
 };
 
+
 async function getCategories(): Promise<Category[]> {
-  const response = await fetch(
-    "https://api.abcz.workers.dev/api/bazardor/categories",
-    { next: { revalidate: 300 } }
-  );
+  "use cache";
+  cacheLife({ stale: 300, revalidate: 300, expire: 3600 });
+
+  const response = await fetch(getApiUrl("categories"));
 
   if (!response.ok) {
     throw new Error("ক্যাটাগরির তথ্য লোড করা যায়নি।");
@@ -25,16 +28,19 @@ async function getCategories(): Promise<Category[]> {
   const data: unknown = await response.json();
 
   if (!Array.isArray(data)) {
-    throw new Error("ক্যাটাগরির তথ্য সঠিক নয়।");
+    throw new Error("ক্যাটাগরির তথ্যের ফরম্যাট সঠিক নয়।");
   }
 
   return data as Category[];
 }
 
+
 async function getProducts(slug: string): Promise<Product[]> {
+  "use cache";
+  cacheLife({ stale: 300, revalidate: 300, expire: 3600 });
+
   const response = await fetch(
-    `https://api.abcz.workers.dev/api/bazardor/products?category=${encodeURIComponent(slug)}`,
-    { next: { revalidate: 300 } }
+    getApiUrl(`products?category=${encodeURIComponent(slug)}`)
   );
 
   if (!response.ok) {
@@ -44,11 +50,12 @@ async function getProducts(slug: string): Promise<Product[]> {
   const data: unknown = await response.json();
 
   if (!Array.isArray(data)) {
-    throw new Error("পণ্যের তথ্য সঠিক নয়।");
+    throw new Error("পণ্যের তথ্যের ফরম্যাট সঠিক নয়।");
   }
 
   return data as Product[];
 }
+
 
 export default async function CategoryPage({
   params,

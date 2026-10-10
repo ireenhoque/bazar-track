@@ -1,23 +1,30 @@
+
+import { cacheLife } from "next/cache";
 import Banner from "@/components/Banner";
 import ProductSection from "@/components/ProductSection";
 import type { Product } from "@/components/ProductCard";
+import { getApiUrl } from "@/lib/api";
 
 async function getProducts(): Promise<Product[]> {
+  "use cache";
+  cacheLife({ stale: 300, revalidate: 300, expire: 3600 });
+
   try {
-    const response = await fetch(
-      "https://api.api-store.workers.dev/api/bazardor/products",
-      {
-        next: { revalidate: 300 },
-      }
-    );
+    const response = await fetch(getApiUrl("products"));
 
     if (!response.ok) {
       console.error("Products API returned:", response.status);
       return [];
     }
 
-    const data: Product[] = await response.json();
-    return data;
+    const data: unknown = await response.json();
+
+    if (!Array.isArray(data)) {
+      console.error("Products API returned an unexpected response.");
+      return [];
+    }
+
+    return data as Product[];
   } catch (error) {
     console.error("Failed to load products:", error);
     return [];
@@ -28,19 +35,13 @@ export default async function HomePage() {
   const products = await getProducts();
 
   const risers = products
-    .filter((product) => product.change?.dir === "up")
-    .sort(
-      (a, b) =>
-        (b.change?.pct ?? 0) - (a.change?.pct ?? 0)
-    )
+    .filter((p) => p.change?.dir === "up")
+    .sort((a, b) => (b.change?.pct ?? 0) - (a.change?.pct ?? 0))
     .slice(0, 6);
 
   const fallers = products
-    .filter((product) => product.change?.dir === "down")
-    .sort(
-      (a, b) =>
-        (a.change?.pct ?? 0) - (b.change?.pct ?? 0)
-    )
+    .filter((p) => p.change?.dir === "down")
+    .sort((a, b) => (a.change?.pct ?? 0) - (b.change?.pct ?? 0))
     .slice(0, 6);
 
   return (

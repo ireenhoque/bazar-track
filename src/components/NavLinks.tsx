@@ -2,6 +2,8 @@
 "use cache";
 
 import Link from "next/link";
+import { cacheLife } from "next/cache";
+import { getApiUrl } from "@/lib/api";
 
 type Category = {
   id: string | number;
@@ -11,26 +13,24 @@ type Category = {
 };
 
 async function getCategories(): Promise<Category[]> {
+  cacheLife({ stale: 300, revalidate: 300, expire: 3600 });
+
   try {
-    const response = await fetch(
-      "https://api.api-store.workers.dev/api/bazardor/categories"
-    );
+    const response = await fetch(getApiUrl("categories"));
 
     if (!response.ok) return [];
 
     const data: unknown = await response.json();
 
-    if (!Array.isArray(data)) return [];
-
-    return data as Category[];
-  } catch {
+    return Array.isArray(data) ? (data as Category[]) : [];
+  } catch (error) {
+    console.error("Failed to load categories:", error);
     return [];
   }
 }
 
 export default async function NavLinks() {
   const categories = await getCategories();
-
 
   return (
     <nav
@@ -51,5 +51,4 @@ export default async function NavLinks() {
       </div>
     </nav>
   );
-
 }
