@@ -9,9 +9,6 @@ if (!mongoUrl) {
   throw new Error("MONGODB_STANDARD_URL is missing");
 }
 
-const client = new MongoClient(mongoUrl);
-const db = client.db("bazar-track_bd");
-
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
@@ -20,6 +17,19 @@ const githubClientSecret = process.env.GITHUB_CLIENT_SECRET;
 
 const appUrl =
   process.env.BETTER_AUTH_URL || "http://localhost:3000";
+
+// Reuse the MongoDB client in this server runtime.
+const globalForMongo = globalThis as typeof globalThis & {
+  mongoClient?: MongoClient;
+};
+
+export const client =
+  globalForMongo.mongoClient ??
+  new MongoClient(mongoUrl);
+
+globalForMongo.mongoClient = client;
+
+const db = client.db("bazar-track_bd");
 
 export const auth = betterAuth({
   baseURL: appUrl,
@@ -51,23 +61,20 @@ export const auth = betterAuth({
   socialProviders: {
     ...(googleClientId && googleClientSecret
       ? {
-          google: {
-            clientId: googleClientId,
-            clientSecret: googleClientSecret,
-          },
-        }
+        google: {
+          clientId: googleClientId,
+          clientSecret: googleClientSecret,
+        },
+      }
       : {}),
 
     ...(githubClientId && githubClientSecret
       ? {
-          github: {
-            clientId: githubClientId,
-            clientSecret: githubClientSecret,
-          },
-        }
+        github: {
+          clientId: githubClientId,
+          clientSecret: githubClientSecret,
+        },
+      }
       : {}),
   },
 });
-
-
-
