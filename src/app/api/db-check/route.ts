@@ -11,7 +11,9 @@ export async function GET() {
     );
   }
 
-  const testClient = new MongoClient(uri);
+  const testClient = new MongoClient(uri, {
+    autoSelectFamily: false,
+  });
 
   try {
     await testClient.connect();
@@ -35,6 +37,6 @@ export async function GET() {
       { status: 500 }
     );
   } finally {
-    await testClient.close().catch(() => {});
+    await testClient.close().catch(() => { });
   }
 }
