@@ -1,7 +1,5 @@
 import { client } from "@/lib/auth";
 
-export const dynamic = "force-dynamic";
-
 export async function GET() {
   try {
     await client.db("bazar-track_bd").command({ ping: 1 });
