@@ -2,6 +2,7 @@ import { client } from "@/lib/auth";
 
 export async function GET() {
   try {
+    await client.connect();
     await client.db("bazar-track_bd").command({ ping: 1 });
 
     return Response.json({
