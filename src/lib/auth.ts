@@ -1,4 +1,3 @@
-
 import { betterAuth } from "better-auth";
 import { MongoClient } from "mongodb";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
@@ -18,11 +17,11 @@ const githubClientSecret = process.env.GITHUB_CLIENT_SECRET;
 const appUrl =
   process.env.BETTER_AUTH_URL || "http://localhost:3000";
 
-// Reuse the MongoDB client and connection promise
-// across requests in the same server runtime.
+// Reuse one MongoDB client per server runtime.
+// The MongoDB driver connects automatically when the first
+// database operation is performed.
 const globalForMongo = globalThis as typeof globalThis & {
   mongoClient?: MongoClient;
-  mongoClientPromise?: Promise<MongoClient>;
 };
 
 const client =
@@ -33,23 +32,6 @@ const client =
   });
 
 globalForMongo.mongoClient = client;
-
-const clientPromise =
-  globalForMongo.mongoClientPromise ??
-  client.connect().catch((error) => {
-    if (globalForMongo.mongoClient === client) {
-      globalForMongo.mongoClient = undefined;
-    }
-
-    globalForMongo.mongoClientPromise = undefined;
-
-    throw error;
-  });
-
-globalForMongo.mongoClientPromise = clientPromise;
-
-// Ensure MongoDB connects before initializing Better Auth.
-await clientPromise;
 
 const db = client.db("bazar-track_bd");
 
@@ -83,20 +65,20 @@ export const auth = betterAuth({
   socialProviders: {
     ...(googleClientId && googleClientSecret
       ? {
-        google: {
-          clientId: googleClientId,
-          clientSecret: googleClientSecret,
-        },
-      }
+          google: {
+            clientId: googleClientId,
+            clientSecret: googleClientSecret,
+          },
+        }
       : {}),
 
     ...(githubClientId && githubClientSecret
       ? {
-        github: {
-          clientId: githubClientId,
-          clientSecret: githubClientSecret,
-        },
-      }
+          github: {
+            clientId: githubClientId,
+            clientSecret: githubClientSecret,
+          },
+        }
       : {}),
   },
 });
